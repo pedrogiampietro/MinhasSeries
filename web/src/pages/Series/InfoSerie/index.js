@@ -9,6 +9,7 @@ const InfoSerie = ({ match }) => {
 	const [mode, setMode] = React.useState('INFO')
 	const [data, setData] = React.useState({})
 	const [genres, setGenres] = React.useState([])
+	const [genreId, setGenreId] = React.useState('')
 
 	React.useEffect(() => {
 		api.get(`/series/${match.params.id}`).then((response) => {
@@ -18,6 +19,11 @@ const InfoSerie = ({ match }) => {
 
 		api.get('genres').then((response) => {
 			setGenres(response.data.data)
+
+			const found = genres.find((value) => data.genre === value.name)
+			if (found) {
+				setGenreId(found.id)
+			}
 		})
 	}, [match.params.id])
 
@@ -38,18 +44,32 @@ const InfoSerie = ({ match }) => {
 		})
 	}
 
+	const select = (value) => () => {
+		setForm({
+			...form,
+			status: value,
+		})
+	}
+
+	const onChangeGenre = (event) => {
+		setGenreId(event.target.value)
+	}
+
 	const handleSubmit = (event) => {
 		event.preventDefault()
 		api
-			.put(`/series/${match.params.id}`, form)
+			.put(`/series/${match.params.id}`, {
+				...form,
+				genre_id: genreId,
+			})
 			.then((response) => {
 				setSuccess(true)
 			})
 	}
 
-	// if (success) {
-	// 	return <Redirect to="/series" />
-	// }
+	if (success) {
+		return <Redirect to="/series" />
+	}
 
 	return (
 		<div>
@@ -67,7 +87,11 @@ const InfoSerie = ({ match }) => {
 							<div className="col-8">
 								<h1 className="font-weight-light text-white">{data.name}</h1>
 								<div className="lead text-white">
-									<Badge color="success">Teste</Badge>
+									{data.status === 'ASSISTIDO' ? (
+										<Badge color="danger">Assistido</Badge>
+									) : (
+										<Badge color="success">Para Assistir</Badge>
+									)}
 									Gênero: {data.genre}
 								</div>
 							</div>
@@ -103,11 +127,11 @@ const InfoSerie = ({ match }) => {
 						<div className="form-group">
 							<label htmlFor="name">Comentários</label>
 							<textarea
-								type="name"
+								type="comments"
 								className="form-control"
-								id="name"
 								placeholder="Faça um comentário sobre essa série"
-								value={form.comments}
+								id="comments"
+								value={form.comments || ''}
 								onChange={onChange('comments')}
 							/>
 						</div>
@@ -115,13 +139,47 @@ const InfoSerie = ({ match }) => {
 							<label htmlFor="genero">Gêneros</label>
 							<select
 								className="custom-select mr-sm-2"
-								onChange={onChange('genre_id')}
+								onChange={onChangeGenre}
+								value={genreId}
 							>
 								<option hidden>Escolha um...</option>
 								{genres.map((genre) => (
-									<option key={genre.id} value={genre.id} select={genre.id === form.genre}>{genre.name}</option>
+									<option key={genre.id} value={genre.id}>
+										{genre.name}
+									</option>
 								))}
 							</select>
+						</div>
+
+						<div className="form-group">
+							<div className="form-check form-check-inline">
+								<input
+									className="form-check-input"
+									type="radio"
+									name="status"
+									id="assistido"
+									value="ASSISTIDO"
+									onClick={select('ASSISTIDO')}
+									defaultChecked={form.status === 'ASSISTIDO'}
+								/>
+								<label className="form-check-label" htmlFor="assistido">
+									Assistido
+								</label>
+							</div>
+							<div className="form-check form-check-inline">
+								<input
+									className="form-check-input"
+									type="radio"
+									name="status"
+									id="paraAssistir"
+									value="PARA_ASSISTIR"
+									onClick={select('PARA_ASSISTIR')}
+									defaultChecked={form.status === 'PARA_ASSISTIR'}
+								/>
+								<label className="form-check-label" htmlFor="paraAssistir">
+									Para Assistir
+								</label>
+							</div>
 						</div>
 
 						<button type="submit" className="btn btn-warning">
