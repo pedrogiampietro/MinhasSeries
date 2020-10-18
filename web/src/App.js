@@ -9,11 +9,11 @@ function App() {
 	return (
 		<BrowserRouter>
 			<Switch>
-				<div className="App">
-					<Header />
+				<>
+				<Header />
 					<Route path="/" exact component={Home} />
 					<Route path="/generos" component={Generos} />
-				</div>
+				</>
 			</Switch>
 		</BrowserRouter>
 	)

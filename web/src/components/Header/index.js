@@ -17,7 +17,7 @@ const Header = () => {
 	return (
 		<Navbar color="light" light expand="md">
 			<NavbarBrand tag={Link} to="/">
-				Minhas Séries
+				Minhas Séries 
 			</NavbarBrand>
 			<NavbarToggler onClick={() => setOpen(!open)} />
 			<Collapse isOpen={open} navbar>
